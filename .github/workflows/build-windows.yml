@@ -1,0 +1,79 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'windows/**'
+      - 'package.json'
+      - 'config.example.yml'
+      - '.github/workflows/build-windows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Kaynak kodu al
+        uses: actions/checkout@v4
+
+      - name: Node.js kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Bağımlılıkları yükle
+        shell: powershell
+        run: npm install --no-audit --no-fund
+
+      - name: Kaynak kodu kontrol et
+        run: npm run check
+
+      - name: Bağımsız Windows EXE oluştur
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          npm run build:win
+
+      - name: Dağıtım klasörünü hazırla
+        shell: powershell
+        run: |
+          $release = 'release/KNX-HomeKit-Bridge-v0.1.0'
+          New-Item -ItemType Directory -Force -Path $release | Out-Null
+          Copy-Item 'dist/KNX-HomeKit-Bridge.exe' "$release/KNX-HomeKit-Bridge.exe"
+          Copy-Item 'config.example.yml' "$release/config.yml"
+          Copy-Item 'windows/KNX-Cihazlarini-Tara.bat' "$release/KNX-Cihazlarini-Tara.bat"
+          Copy-Item 'windows/KNX-HomeKit-Baslat.bat' "$release/KNX-HomeKit-Baslat.bat"
+          Copy-Item 'README.md' "$release/README.md"
+          Get-FileHash "$release/KNX-HomeKit-Bridge.exe" -Algorithm SHA256 |
+            ForEach-Object { $_.Hash + '  KNX-HomeKit-Bridge.exe' } |
+            Set-Content "$release/SHA256.txt"
+
+      - name: EXE dosyasını doğrula
+        shell: powershell
+        run: |
+          $exe = 'release/KNX-HomeKit-Bridge-v0.1.0/KNX-HomeKit-Bridge.exe'
+          if (!(Test-Path $exe)) { throw 'EXE oluşturulamadı.' }
+          if ((Get-Item $exe).Length -lt 10000000) { throw 'EXE beklenenden küçük; Node çalışma zamanı gömülmemiş olabilir.' }
+          $bytes = [System.IO.File]::ReadAllBytes($exe)
+          if ($bytes[0] -ne 0x4D -or $bytes[1] -ne 0x5A) { throw 'Dosya geçerli bir Windows PE/EXE değil.' }
+          Write-Host "EXE doğrulandı: $((Get-Item $exe).Length) byte"
+
+      - name: ZIP oluştur
+        shell: powershell
+        run: Compress-Archive -Path 'release/KNX-HomeKit-Bridge-v0.1.0/*' -DestinationPath 'release/KNX-HomeKit-Bridge-v0.1.0-Windows-x64.zip' -Force
+
+      - name: Derleme çıktısını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: KNX-HomeKit-Bridge-v0.1.0-Windows-x64
+          path: release/KNX-HomeKit-Bridge-v0.1.0-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 30
