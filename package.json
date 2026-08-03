@@ -1,6 +1,6 @@
 {
   "name": "knx-homekit-bridge",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Standalone Windows KNX/IP to Apple HomeKit bridge",
   "main": "src/main.js",
@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node src/main.js",
     "discover": "node src/main.js discover",
-    "check": "node --check src/main.js && node --check src/index.js && node --check src/discover.js && node --check src/knx.js",
+    "check": "node --check src/main.js",
     "build:win": "pkg --targets node20-win-x64 --output dist/KNX-HomeKit-Bridge.exe src/main.js"
   },
   "engines": {
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "hap-nodejs": "0.14.1",
-    "knx-ip": "0.0.18",
+    "knx": "2.5.4",
     "qrcode-terminal": "0.12.0",
     "yaml": "2.8.1"
   },
@@ -27,14 +27,14 @@
     "scripts": [
       "src/**/*.js",
       "node_modules/hap-nodejs/**/*.js",
-      "node_modules/knx-ip/**/*.js",
+      "node_modules/knx/**/*.js",
       "node_modules/qrcode-terminal/**/*.js",
       "node_modules/yaml/**/*.js"
     ],
     "assets": [
       "node_modules/hap-nodejs/dist/lib/definitions/*.json",
       "node_modules/hap-nodejs/**/*.json",
-      "node_modules/knx-ip/**/*.json"
+      "node_modules/knx/**/*.json"
     ],
     "outputPath": "dist"
   }
