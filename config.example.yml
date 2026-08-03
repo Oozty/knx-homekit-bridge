@@ -1,0 +1,42 @@
+homekit:
+  name: "KNX Bridge Pro"
+  username: "02:11:22:33:44:55"
+  pincode: "031-45-154"
+  port: 51826
+
+knx:
+  gatewayIp: "192.168.1.100"
+  gatewayPort: 3671
+  physicalAddress: "1.1.250"
+
+accessories:
+  - id: salon-tavan
+    name: "Salon Tavan"
+    type: light
+    writeAddress: "1/0/1"
+    statusAddress: "1/0/2"
+
+  - id: salon-spot
+    name: "Salon Spot"
+    type: dimmer
+    switchWriteAddress: "1/1/1"
+    switchStatusAddress: "1/1/2"
+    brightnessWriteAddress: "1/1/3"
+    brightnessStatusAddress: "1/1/4"
+
+  - id: salon-perde
+    name: "Salon Perde"
+    type: blind
+    positionWriteAddress: "2/0/1"
+    positionStatusAddress: "2/0/2"
+    invert: true
+
+  - id: salon-sicaklik
+    name: "Salon Sıcaklık"
+    type: temperature
+    statusAddress: "3/0/1"
+
+  - id: balkon-kapi
+    name: "Balkon Kapısı"
+    type: contact
+    statusAddress: "4/0/1"
